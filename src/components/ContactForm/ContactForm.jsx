@@ -1,8 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
 import css from './ContactForm.module.css';
 import { nanoid } from '@reduxjs/toolkit';
-import { addContact } from 'redux/contactSlice';
-import { selectContacts } from 'redux/selectors';
+import { addContact } from 'redux/contacts/operations';
+import { selectContacts } from 'redux/contacts/selectors';
 import PropTypes from 'prop-types';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -59,7 +59,11 @@ export const ContactForm = () => {
           id="name"
           required
         />
-        <ErrorMessage name="name" component="div" className={css.error_message} />
+        <ErrorMessage
+          name="name"
+          component="div"
+          className={css.error_message}
+        />
 
         <label className={css.form_label} htmlFor="example number">
           Number
@@ -71,7 +75,11 @@ export const ContactForm = () => {
           id="phone"
           required
         />
-        <ErrorMessage name="phone" component="div" className={css.error_message} />
+        <ErrorMessage
+          name="phone"
+          component="div"
+          className={css.error_message}
+        />
 
         <button className={css.form_button} type="submit">
           Add contact

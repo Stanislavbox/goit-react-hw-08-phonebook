@@ -1,22 +1,23 @@
 import React from 'react';
 import css from './ContactList.module.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteContact } from 'redux/contactSlice';
-import PropTypes from 'prop-types';
-import {
-  selectContacts,
-  selectStatusFilter,
-  selectIsLoading,
-} from 'redux/selectors';
+import { deleteContact } from 'redux/contacts/operations';
+
+import { selectContacts } from 'redux/contacts/selectors';
+import { selectFilter } from 'redux/filter/selectors';
+import { selectLoading } from 'redux/auth/selectors';
 
 export const ContactList = () => {
   const dispatch = useDispatch();
-  const isLoading = useSelector(selectIsLoading);
+  const isLoading = useSelector(selectLoading);
   const contacts = useSelector(selectContacts);
-  const contactsQuery = useSelector(selectStatusFilter);
+    console.log('first', contacts)
+  const contactsQuery = useSelector(selectFilter);
   const filterContactsList = contacts.filter(contact =>
     contact.name.toLowerCase().includes(contactsQuery.toLowerCase())
   );
+
+
 
   return (
     <ul className={css.contact_List}>
@@ -40,16 +41,4 @@ export const ContactList = () => {
       )}
     </ul>
   );
-};
-
-ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ),
-  contactsQuery: PropTypes.string,
-  dispatch: PropTypes.func,
 };
