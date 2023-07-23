@@ -1,44 +1,45 @@
-import React from 'react';
-import css from './ContactList.module.css';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteContact } from 'redux/contacts/operations';
-
-import { selectContacts } from 'redux/contacts/selectors';
-import { selectFilter } from 'redux/filter/selectors';
-import { selectLoading } from 'redux/auth/selectors';
+import {
+  UnorderedList,
+  Alert,
+  AlertIcon,
+  ChakraProvider,
+} from '@chakra-ui/react';
+import { Contact } from 'components/Contact/Contact';
+import { Loader } from 'components/Loader/Loader';
+import { fetchContacts } from 'redux/contacts/contactsOperations';
+import {
+  selectError,
+  selectIsloading,
+  selectVisibleContacts,
+} from 'redux/contacts/contactsSelectors';
 
 export const ContactList = () => {
+  const isLoading = useSelector(selectIsloading);
+  const error = useSelector(selectError);
+  const contacts = useSelector(selectVisibleContacts);
+
   const dispatch = useDispatch();
-  const isLoading = useSelector(selectLoading);
-  const contacts = useSelector(selectContacts);
-    console.log('first', contacts)
-  const contactsQuery = useSelector(selectFilter);
-  const filterContactsList = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(contactsQuery.toLowerCase())
-  );
 
-
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   return (
-    <ul className={css.contact_List}>
-      {filterContactsList.length ? (
-        filterContactsList.map(contact => (
-          <li className={css.contact_item} key={contact.id}>
-            {contact.name} - {contact.phone}
-            {!isLoading && (
-              <button
-                type="button"
-                className={css.contact_button}
-                onClick={() => dispatch(deleteContact(contact.id))}
-              >
-                Delete
-              </button>
-            )}
-          </li>
-        ))
-      ) : (
-        <p className={css.contact__message}>No such contact with that name</p>
+    <ChakraProvider>
+      {isLoading && <Loader />}
+      {error && (
+        <Alert status="error" mt={4}>
+          <AlertIcon />
+          Please authenticate
+        </Alert>
       )}
-    </ul>
+      <UnorderedList listStyleType="none">
+        {contacts.map(({ id, name, number }) => (
+          <Contact name={name} number={number} id={id} key={id} />
+        ))}
+      </UnorderedList>
+    </ChakraProvider>
   );
 };

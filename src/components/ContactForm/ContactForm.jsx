@@ -1,95 +1,78 @@
-import { useDispatch, useSelector } from 'react-redux';
-import css from './ContactForm.module.css';
+import toast, { Toaster } from 'react-hot-toast';
 import { nanoid } from '@reduxjs/toolkit';
-import { addContact } from 'redux/contacts/operations';
-import { selectContacts } from 'redux/contacts/selectors';
-import PropTypes from 'prop-types';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectContacts } from 'redux/contacts/contactsSelectors';
+import { addContact } from 'redux/contacts/contactsOperations';
+import {
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  VStack,
+  ChakraProvider,
+  Heading,
+} from '@chakra-ui/react';
 
 export const ContactForm = () => {
-  const contacts = useSelector(selectContacts);
   const dispatch = useDispatch();
+  const contacts = useSelector(selectContacts);
 
-  const validationSchema = Yup.object({
-    name: Yup.string()
-      .required('Name is required')
-      .matches(
-        /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/,
-        'Name may contain only letters, apostrophe, dash and spaces.'
-      ),
-    phone: Yup.string()
-      .required('Phone number is required')
-      .matches(
-        /\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/,
-        'Phone number must be digits and can contain spaces, dashes, parentheses and can start with +'
-      ),
-  });
+  const handleSubmit = e => {
+    e.preventDefault();
+    const { name, number } = e.target;
+    const oldContact = contacts.find(contact => contact.name === name.value);
 
-  const handleSubmit = (values, { resetForm }) => {
-    const isDuplicateContact = contacts.find(
-      contact => contact.name.toLowerCase() === values.name.toLowerCase()
-    );
-
-    if (isDuplicateContact) {
-      alert('The contact already exists!');
-      resetForm();
+    if (oldContact) {
+      toast.error('Sorry, a contact with this name already exists');
+      e.target.reset();
       return;
     }
 
-    const id = nanoid();
-    dispatch(addContact({ id, ...values }));
-    resetForm();
+    const contact = {
+      name: name.value,
+      number: number.value,
+      id: nanoid(),
+    };
+    e.target.reset();
+    dispatch(addContact(contact));
   };
 
   return (
-    <Formik
-      initialValues={{ name: '', phone: '' }}
-      validationSchema={validationSchema}
-      onSubmit={handleSubmit}
-    >
-      <Form className={css.form_contact}>
-        <label className={css.form_label} htmlFor="example name">
-          Name
-        </label>
-        <Field
-          className={css.form_input}
-          type="text"
-          name="name"
-          id="name"
-          required
-        />
-        <ErrorMessage
-          name="name"
-          component="div"
-          className={css.error_message}
-        />
-
-        <label className={css.form_label} htmlFor="example number">
-          Number
-        </label>
-        <Field
-          className={css.form_input}
-          type="tel"
-          name="phone"
-          id="phone"
-          required
-        />
-        <ErrorMessage
-          name="phone"
-          component="div"
-          className={css.error_message}
-        />
-
-        <button className={css.form_button} type="submit">
-          Add contact
-        </button>
-      </Form>
-    </Formik>
+    <ChakraProvider>
+      <Toaster />
+      <form onSubmit={handleSubmit}>
+        <VStack spacing={4}>
+          <Heading margin={4}>Phonebook</Heading>
+          <FormControl>
+            <FormLabel htmlFor="name">Name</FormLabel>
+            <Input
+              id="name"
+              type="text"
+              name="name"
+              pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+              title="The name can only contain letters, apostrophes, hyphens, and spaces. For example, Иван, Мария Иванова, John Doe"
+              required
+              variant="outline"
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor="number">Number</FormLabel>
+            <Input
+              id="number"
+              type="tel"
+              name="number"
+              pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+              title="The phone number must contain only numbers and may include spaces, hyphens, brackets and may begin with +"
+              required
+              variant="outline"
+              marginBottom={4}
+            />
+          </FormControl>
+          <Button colorScheme="blue" type="submit">
+            Add contact
+          </Button>
+        </VStack>
+      </form>
+    </ChakraProvider>
   );
-};
-
-ContactForm.propTypes = {
-  contactsSelector: PropTypes.func,
-  addContact: PropTypes.func,
 };
