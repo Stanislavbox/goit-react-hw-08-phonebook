@@ -1,3 +1,8 @@
+email: stas@gmail.com
+password: 1234567
+
+
+
 # React homework template
 
 Этот проект был создан при помощи
